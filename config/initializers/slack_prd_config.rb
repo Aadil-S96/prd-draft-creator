@@ -29,5 +29,7 @@ module SlackPrdConfig
   class ConfigurationError < StandardError; end
 end
 
-# Validate configuration on startup (skip in test environment for flexibility)
-SlackPrdConfig.validate! unless Rails.env.test?
+# Validate configuration on startup (skip in test and during asset precompilation)
+unless Rails.env.test? || ENV["SECRET_KEY_BASE_DUMMY"].present?
+  SlackPrdConfig.validate!
+end
