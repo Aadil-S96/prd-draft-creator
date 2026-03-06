@@ -1,0 +1,118 @@
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-slate-900 mb-1">Admin Dashboard</h1>
+  <p class="text-slate-500 text-sm">Overview of all users and PRDs on the platform</p>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500 mb-1">Total Users</p>
+    <p class="text-3xl font-bold text-slate-900"><%= @users.count %></p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500 mb-1">Total PRDs</p>
+    <p class="text-3xl font-bold text-slate-900"><%= @projects.count %></p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500 mb-1">Notion Connected</p>
+    <p class="text-3xl font-bold text-slate-900"><%= @users.select(&:has_notion_config?).count %></p>
+  </div>
+</div>
+
+<!-- Users -->
+<div class="bg-white rounded-2xl border border-slate-200 mb-8">
+  <div class="px-6 py-4 border-b border-slate-100">
+    <h2 class="font-semibold text-slate-900">Users</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-slate-100">
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">User</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Email</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">PRDs</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Notion</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Joined</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <% @users.each do |user| %>
+          <tr class="hover:bg-slate-50/50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-xs">
+                  <%= user.display_name[0].upcase %>
+                </div>
+                <span class="font-medium text-sm text-slate-900"><%= user.display_name %></span>
+                <% if user.admin? %>
+                  <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700">admin</span>
+                <% end %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500"><%= user.email %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium"><%= user.projects.count %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <% if user.has_notion_config? %>
+                <span class="inline-flex items-center gap-1 text-emerald-600">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  Connected
+                </span>
+              <% else %>
+                <span class="text-slate-400">—</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400"><%= user.created_at.strftime('%b %d, %Y') %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent PRDs -->
+<div class="bg-white rounded-2xl border border-slate-200">
+  <div class="px-6 py-4 border-b border-slate-100">
+    <h2 class="font-semibold text-slate-900">Recent PRDs</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-slate-100">
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Project</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Created By</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Priority</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Created</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Links</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        <% @projects.each do |project| %>
+          <tr class="hover:bg-slate-50/50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <%= link_to project.name, project_path(project), class: "text-sm font-medium text-indigo-600 hover:text-indigo-700" %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500"><%= project.user&.display_name || "System" %></td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= priority_badge_class(project.priority) %>"><%= project.priority %></span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= status_badge_class(project.status) %>"><%= project.status.humanize %></span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400"><%= project.created_at.strftime('%b %d, %Y') %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <div class="flex items-center gap-2">
+                <% if project.notion_url.present? %>
+                  <%= link_to "Notion", project.notion_url, target: "_blank", class: "text-indigo-500 hover:text-indigo-600" %>
+                <% end %>
+                <% if project.slack_thread_url.present? %>
+                  <%= link_to "Slack", project.slack_thread_url, target: "_blank", class: "text-indigo-500 hover:text-indigo-600" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
