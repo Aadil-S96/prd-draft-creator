@@ -4,7 +4,6 @@
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
   ./bin/rails db:migrate:queue 2>/dev/null || true
-  ./bin/rails db:seed
 fi
 
 exec "${@}"

@@ -16,13 +16,10 @@ class SlackEventsController < ApplicationController
     when "app_mention"
       normalized = SlackEventService.new(payload).normalized_event
 
-      ProcessSlackMentionJob.perform_later(
-        team_id: normalized[:team_id],
-        channel: normalized[:channel],
+      PrdGenerationJob.perform_later(
+        channel_id: normalized[:channel],
         thread_ts: normalized[:thread_ts],
-        event_ts: normalized[:event_ts],
-        user: normalized[:user],
-        slack_thread_url: normalized[:slack_thread_url]
+        user_id: normalized[:user]
       )
     else
       Rails.logger.info("Unhandled Slack event type: #{event['type']}")
